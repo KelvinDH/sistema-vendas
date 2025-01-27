@@ -8,23 +8,30 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { adicionarVenda } from "../actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { ModalSucesso } from "./modal-sucesso"
 import type { TipoVenda, StatusPagamento } from "@/lib/utils"
 
 export function AdicionarVenda() {
   const [error, setError] = useState<string | null>(null)
+  const [showSuccessModal, setShowSuccessModal] = useState(false)
   const [tipo, setTipo] = useState<TipoVenda>("fatia")
   const [statusPagamento, setStatusPagamento] = useState<StatusPagamento>("pendente")
   const router = useRouter()
 
   async function handleSubmit(formData: FormData) {
+    setError(null)
     formData.append("tipo", tipo)
     formData.append("statusPagamento", statusPagamento)
     const result = await adicionarVenda(formData)
     if (result.error) {
       setError(result.error)
     } else {
-      setError(null)
+      setShowSuccessModal(true)
       router.refresh()
+      // Resetar o formulário
+      document.querySelector("form")?.reset()
+      setTipo("fatia")
+      setStatusPagamento("pendente")
     }
   }
 
@@ -83,9 +90,10 @@ export function AdicionarVenda() {
           <Button type="submit" className="w-full">
             Adicionar Venda
           </Button>
-          {error && <p className="text-destructive text-center">{error}</p>}
+          {error && <p className="text-red-500 mt-2">{error}</p>}
         </form>
       </CardContent>
+      <ModalSucesso isOpen={showSuccessModal} onClose={() => setShowSuccessModal(false)} />
     </Card>
   )
 }

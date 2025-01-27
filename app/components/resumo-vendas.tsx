@@ -1,8 +1,22 @@
+"use client"
+
+import { useState, useEffect } from "react"
 import { type Venda, formatarMoeda, type TipoVenda } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PieChart, Cake, Coffee, DollarSign, AlertCircle } from "lucide-react"
+import { obterVendas } from "../actions"
 
-export function ResumoVendas({ vendas }: { vendas: Venda[] }) {
+export function ResumoVendas() {
+  const [vendas, setVendas] = useState<Venda[]>([])
+
+  useEffect(() => {
+    const carregarVendas = async () => {
+      const vendasCarregadas = await obterVendas()
+      setVendas(vendasCarregadas)
+    }
+    carregarVendas()
+  }, [])
+
   const totalVendas = vendas.reduce((total, venda) => total + venda.quantidade * venda.preco, 0)
   const quantidadeTotal = vendas.reduce((total, venda) => total + venda.quantidade, 0)
 

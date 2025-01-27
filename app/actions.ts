@@ -1,8 +1,7 @@
 "use server"
 
+import { db } from "./db"
 import type { Venda, TipoVenda, StatusPagamento } from "@/lib/utils"
-
-const vendas: Venda[] = []
 
 export async function adicionarVenda(formData: FormData) {
   const sabor = formData.get("sabor") as string
@@ -17,32 +16,53 @@ export async function adicionarVenda(formData: FormData) {
   }
 
   const novaVenda: Venda = {
-    id: Date.now().toString(),
     sabor,
     tipo,
     quantidade,
     preco,
-    data: new Date(),
+    data: new Date().toISOString(),
     cliente,
     statusPagamento,
   }
 
-  vendas.push(novaVenda)
-  return { success: true }
+  try {
+    await db.vendas.add(novaVenda)
+    return { success: true }
+  } catch (error) {
+    console.error("Erro ao adicionar venda:", error)
+    return { error: "Erro ao adicionar venda" }
+  }
 }
 
 export async function obterVendas(startDate?: string, endDate?: string) {
-  if (!startDate || !endDate) {
+  try {
+    let vendas = await db.vendas.toArray()
+
+    if (startDate && endDate) {
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      end.setHours(23, 59, 59, 999) // Set to end of day
+
+      vendas = vendas.filter((venda) => {
+        const vendaDate = new Date(venda.data)
+        return vendaDate >= start && vendaDate <= end
+      })
+    }
+
     return vendas
+  } catch (error) {
+    console.error("Erro ao obter vendas:", error)
+    return []
   }
+}
 
-  const start = new Date(startDate)
-  const end = new Date(endDate)
-  end.setHours(23, 59, 59, 999) // Set to end of day
-
-  return vendas.filter((venda) => {
-    const vendaDate = new Date(venda.data)
-    return vendaDate >= start && vendaDate <= end
-  })
+export async function atualizarStatusPagamento(id: string, novoStatus: StatusPagamento) {
+  try {
+    await db.vendas.update(id, { statusPagamento: novoStatus })
+    return { success: true }
+  } catch (error) {
+    console.error("Erro ao atualizar status de pagamento:", error)
+    return { error: "Erro ao atualizar status de pagamento" }
+  }
 }
 
