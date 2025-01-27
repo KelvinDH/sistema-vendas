@@ -6,8 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { atualizarStatusPagamento, obterVendas } from "../actions"
 import { useRouter } from "next/navigation"
+import { db } from "../db"
 
 export function ListaVendas() {
   const [vendas, setVendas] = useState<Venda[]>([])
@@ -15,14 +15,14 @@ export function ListaVendas() {
 
   useEffect(() => {
     const carregarVendas = async () => {
-      const vendasCarregadas = await obterVendas()
+      const vendasCarregadas = await db.obterVendas()
       setVendas(vendasCarregadas)
     }
     carregarVendas()
   }, [])
 
   const handleStatusChange = async (id: string, novoStatus: "pendente" | "pago") => {
-    const result = await atualizarStatusPagamento(id, novoStatus)
+    const result = await db.atualizarStatusPagamento(id, novoStatus)
     if (result.success) {
       setVendas(vendas.map((venda) => (venda.id === id ? { ...venda, statusPagamento: novoStatus } : venda)))
       router.refresh()

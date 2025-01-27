@@ -6,10 +6,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { adicionarVenda } from "../actions"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ModalSucesso } from "./modal-sucesso"
-import type { TipoVenda, StatusPagamento } from "@/lib/utils"
+import { db } from "../db"
+import type { TipoVenda, StatusPagamento, Venda } from "@/lib/utils"
 
 export function AdicionarVenda() {
   const [error, setError] = useState<string | null>(null)
@@ -18,18 +18,38 @@ export function AdicionarVenda() {
   const [statusPagamento, setStatusPagamento] = useState<StatusPagamento>("pendente")
   const router = useRouter()
 
-  async function handleSubmit(formData: FormData) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault()
     setError(null)
-    formData.append("tipo", tipo)
-    formData.append("statusPagamento", statusPagamento)
-    const result = await adicionarVenda(formData)
-    if (result.error) {
+
+    const formData = new FormData(event.currentTarget)
+    const sabor = formData.get("sabor") as string
+    const quantidade = Number(formData.get("quantidade"))
+    const preco = Number(formData.get("preco"))
+    const cliente = formData.get("cliente") as string
+
+    if (!sabor || !tipo || isNaN(quantidade) || isNaN(preco) || !cliente || !statusPagamento) {
+      setError("Todos os campos são obrigatórios")
+      return
+    }
+
+    const novaVenda: Omit<Venda, "id"> = {
+      sabor,
+      tipo,
+      quantidade,
+      preco,
+      data: new Date().toISOString(),
+      cliente,
+      statusPagamento,
+    }
+
+    const result = await db.adicionarVenda(novaVenda)
+    if ("error" in result) {
       setError(result.error)
     } else {
       setShowSuccessModal(true)
       router.refresh()
-      // Resetar o formulário
-      document.querySelector("form")?.reset()
+      event.currentTarget.reset()
       setTipo("fatia")
       setStatusPagamento("pendente")
     }
@@ -41,7 +61,7 @@ export function AdicionarVenda() {
         <CardTitle>Nova Venda</CardTitle>
       </CardHeader>
       <CardContent>
-        <form action={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="sabor">Sabor da Torta</Label>
