@@ -43,15 +43,27 @@ export function AdicionarVenda() {
       statusPagamento,
     }
 
-    const result = await db.adicionarVenda(novaVenda)
-    if ("error" in result) {
-      setError(result.error)
-    } else {
-      setShowSuccessModal(true)
-      router.refresh()
-      event.currentTarget.reset()
-      setTipo("fatia")
-      setStatusPagamento("pendente")
+    try {
+      console.log("Enviando nova venda:", JSON.stringify(novaVenda, null, 2))
+      const result = await db.adicionarVenda(novaVenda)
+      console.log("Resultado da adição:", JSON.stringify(result, null, 2))
+      if ("error" in result) {
+        throw new Error(result.error)
+      } else {
+        console.log("Venda adicionada com sucesso:", result)
+        setShowSuccessModal(true)
+        router.refresh()
+        if (event.currentTarget instanceof HTMLFormElement) {
+          event.currentTarget.reset()
+        }
+        setTipo("fatia")
+        setStatusPagamento("pendente")
+      }
+    } catch (error) {
+      console.error("Erro ao adicionar venda:", error)
+      setError(
+        error instanceof Error ? error.message : "Ocorreu um erro ao adicionar a venda. Por favor, tente novamente.",
+      )
     }
   }
 

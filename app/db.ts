@@ -13,11 +13,16 @@ class VendasDatabase extends Dexie {
 
   async adicionarVenda(venda: Omit<Venda, "id">) {
     try {
+      console.log("Tentando adicionar venda:", JSON.stringify(venda, null, 2))
       const id = await this.vendas.add(venda)
+      console.log("Venda adicionada com sucesso, ID:", id)
       return { success: true, id }
     } catch (error) {
       console.error("Erro ao adicionar venda:", error)
-      return { error: "Erro ao adicionar venda" }
+      return {
+        error: "Erro ao adicionar venda",
+        details: error instanceof Error ? error.message : String(error),
+      }
     }
   }
 
