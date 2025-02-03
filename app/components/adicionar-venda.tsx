@@ -14,6 +14,14 @@ import type { TipoVenda, StatusPagamento, Venda } from "@/lib/utils"
 export function AdicionarVenda() {
   const [error, setError] = useState<string | null>(null)
   const [showSuccessModal, setShowSuccessModal] = useState(false)
+  const [formValues, setFormValues] = useState({
+    sabor: "",
+    tipo: "fatia" as TipoVenda,
+    quantidade: "",
+    preco: "",
+    cliente: "",
+    statusPagamento: "pendente" as StatusPagamento,
+  })
   const [tipo, setTipo] = useState<TipoVenda>("fatia")
   const [statusPagamento, setStatusPagamento] = useState<StatusPagamento>("pendente")
   const router = useRouter()
@@ -53,6 +61,7 @@ export function AdicionarVenda() {
         console.log("Venda adicionada com sucesso:", result)
         setShowSuccessModal(true)
         router.refresh()
+        // Limpar os campos do formulário
         if (event.currentTarget instanceof HTMLFormElement) {
           event.currentTarget.reset()
         }
@@ -77,11 +86,21 @@ export function AdicionarVenda() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="sabor">Sabor da Torta</Label>
-              <Input id="sabor" name="sabor" required className="w-full" />
+              <Input
+                id="sabor"
+                name="sabor"
+                value={formValues.sabor}
+                onChange={(e) => setFormValues((prev) => ({ ...prev, sabor: e.target.value }))}
+                required
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="tipo">Tipo de Venda</Label>
-              <Select onValueChange={(value) => setTipo(value as TipoVenda)} defaultValue={tipo}>
+              <Select
+                onValueChange={(value) => setFormValues((prev) => ({ ...prev, tipo: value as TipoVenda }))}
+                value={formValues.tipo}
+              >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o tipo de venda" />
                 </SelectTrigger>
@@ -93,21 +112,49 @@ export function AdicionarVenda() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="quantidade">Quantidade</Label>
-              <Input id="quantidade" name="quantidade" type="number" min="1" required className="w-full" />
+              <Input
+                id="quantidade"
+                name="quantidade"
+                type="number"
+                min="1"
+                value={formValues.quantidade}
+                onChange={(e) => setFormValues((prev) => ({ ...prev, quantidade: e.target.value }))}
+                required
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="preco">Preço Unitário (R$)</Label>
-              <Input id="preco" name="preco" type="number" step="0.01" min="0" required className="w-full" />
+              <Input
+                id="preco"
+                name="preco"
+                type="number"
+                step="0.01"
+                min="0"
+                value={formValues.preco}
+                onChange={(e) => setFormValues((prev) => ({ ...prev, preco: e.target.value }))}
+                required
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="cliente">Nome do Cliente</Label>
-              <Input id="cliente" name="cliente" required className="w-full" />
+              <Input
+                id="cliente"
+                name="cliente"
+                value={formValues.cliente}
+                onChange={(e) => setFormValues((prev) => ({ ...prev, cliente: e.target.value }))}
+                required
+                className="w-full"
+              />
             </div>
             <div className="space-y-2">
               <Label htmlFor="statusPagamento">Status do Pagamento</Label>
               <Select
-                onValueChange={(value) => setStatusPagamento(value as StatusPagamento)}
-                defaultValue={statusPagamento}
+                onValueChange={(value) =>
+                  setFormValues((prev) => ({ ...prev, statusPagamento: value as StatusPagamento }))
+                }
+                value={formValues.statusPagamento}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Selecione o status do pagamento" />

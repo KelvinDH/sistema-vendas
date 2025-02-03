@@ -34,38 +34,34 @@ export default function RelatorioPage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <header className="bg-primary text-primary-foreground shadow-md">
-        <div className="container mx-auto py-4 px-6 flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Relatório de Vendas</h1>
-          <div className="flex gap-4">
-            <PrintButton contentRef={componentRef} />
-            <Link href="/">
-              <Button variant="secondary" className="flex items-center gap-2">
-                <ArrowLeft className="h-4 w-4" />
-                Voltar
-              </Button>
-            </Link>
-          </div>
+    <div className="container mx-auto p-6 space-y-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Relatório de Vendas</h1>
+        <div className="flex gap-4">
+          <PrintButton contentRef={componentRef} />
+          <Link href="/">
+            <Button variant="secondary" className="flex items-center gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Voltar
+            </Button>
+          </Link>
         </div>
-      </header>
-      <main className="flex-grow container mx-auto p-6 space-y-8">
-        <FiltrosRelatorio onFilterChange={handleFilterChange} />
-        {isLoading ? (
-          <div className="text-center">Carregando...</div>
-        ) : (
-          <div ref={componentRef}>
-            <section>
-              <h2 className="text-2xl font-semibold mb-6">Resumo das Vendas</h2>
-              <ResumoVendas vendas={vendas} />
-            </section>
-            <section className="mt-8">
-              <h2 className="text-2xl font-semibold mb-6">Lista de Vendas</h2>
-              <ListaVendas vendas={vendas} />
-            </section>
-          </div>
-        )}
-      </main>
+      </div>
+      <FiltrosRelatorio onFilterChange={handleFilterChange} />
+      {isLoading ? (
+        <div className="text-center">Carregando...</div>
+      ) : (
+        <div ref={componentRef}>
+          <section>
+            <h2 className="text-2xl font-semibold mb-6">Resumo das Vendas</h2>
+            <ResumoVendas vendas={vendas} />
+          </section>
+          <section className="mt-8">
+            <h2 className="text-2xl font-semibold mb-6">Lista de Vendas</h2>
+            <ListaVendas vendas={vendas} />
+          </section>
+        </div>
+      )}
     </div>
   )
 }

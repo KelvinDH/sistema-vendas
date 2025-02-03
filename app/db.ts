@@ -1,5 +1,5 @@
 import Dexie, { type Table } from "dexie"
-import { type Venda, TipoVenda, type StatusPagamento } from "@/lib/utils"
+import type { Venda, StatusPagamento } from "@/lib/utils"
 
 class VendasDatabase extends Dexie {
   vendas!: Table<Venda>
@@ -48,14 +48,18 @@ class VendasDatabase extends Dexie {
     }
   }
 
-  async atualizarStatusPagamento(id: string, novoStatus: StatusPagamento) {
+  async atualizarVenda(id: string, venda: Partial<Venda>) {
     try {
-      await this.vendas.update(id, { statusPagamento: novoStatus })
+      await this.vendas.update(id, venda)
       return { success: true }
     } catch (error) {
-      console.error("Erro ao atualizar status de pagamento:", error)
-      return { error: "Erro ao atualizar status de pagamento" }
+      console.error("Erro ao atualizar venda:", error)
+      return { error: "Erro ao atualizar venda" }
     }
+  }
+
+  async atualizarStatusPagamento(id: string, novoStatus: StatusPagamento) {
+    return this.atualizarVenda(id, { statusPagamento: novoStatus })
   }
 }
 
