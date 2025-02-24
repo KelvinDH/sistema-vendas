@@ -8,6 +8,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "Sistema de Vendas de Tortas",
   description: "Gerencie suas vendas de tortas de forma eficiente",
+    generator: 'v0.dev'
 }
 
 export default function RootLayout({
@@ -34,3 +35,6 @@ export default function RootLayout({
   )
 }
 
+
+
+import './globals.css'

@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -7,6 +9,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Calendar } from "@/components/ui/calendar"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { CalendarIcon } from "lucide-react"
+import { format } from "date-fns"
+import { ptBR } from "date-fns/locale"
+import { cn } from "@/lib/utils"
 import { ModalSucesso } from "./modal-sucesso"
 import { db } from "../db"
 import type { TipoVenda, StatusPagamento, Venda } from "@/lib/utils"
@@ -21,22 +29,17 @@ export function AdicionarVenda() {
     preco: "",
     cliente: "",
     statusPagamento: "pendente" as StatusPagamento,
+    data: new Date(),
   })
-  const [tipo, setTipo] = useState<TipoVenda>("fatia")
-  const [statusPagamento, setStatusPagamento] = useState<StatusPagamento>("pendente")
   const router = useRouter()
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setError(null)
 
-    const formData = new FormData(event.currentTarget)
-    const sabor = formData.get("sabor") as string
-    const quantidade = Number(formData.get("quantidade"))
-    const preco = Number(formData.get("preco"))
-    const cliente = formData.get("cliente") as string
+    const { sabor, tipo, quantidade, preco, cliente, statusPagamento, data } = formValues
 
-    if (!sabor || !tipo || isNaN(quantidade) || isNaN(preco) || !cliente || !statusPagamento) {
+    if (!sabor || !tipo || !quantidade || !preco || !cliente || !statusPagamento || !data) {
       setError("Todos os campos são obrigatórios")
       return
     }
@@ -44,9 +47,9 @@ export function AdicionarVenda() {
     const novaVenda: Omit<Venda, "id"> = {
       sabor,
       tipo,
-      quantidade,
-      preco,
-      data: new Date().toISOString(),
+      quantidade: Number(quantidade),
+      preco: Number(preco),
+      data: data.toISOString(),
       cliente,
       statusPagamento,
     }
@@ -62,11 +65,15 @@ export function AdicionarVenda() {
         setShowSuccessModal(true)
         router.refresh()
         // Limpar os campos do formulário
-        if (event.currentTarget instanceof HTMLFormElement) {
-          event.currentTarget.reset()
-        }
-        setTipo("fatia")
-        setStatusPagamento("pendente")
+        setFormValues({
+          sabor: "",
+          tipo: "fatia",
+          quantidade: "",
+          preco: "",
+          cliente: "",
+          statusPagamento: "pendente",
+          data: new Date(),
+        })
       }
     } catch (error) {
       console.error("Erro ao adicionar venda:", error)
@@ -164,6 +171,35 @@ export function AdicionarVenda() {
                   <SelectItem value="pago">Pago</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="data">Data da Venda</Label>
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant={"outline"}
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !formValues.data && "text-muted-foreground",
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {formValues.data ? (
+                      format(formValues.data, "PPP", { locale: ptBR })
+                    ) : (
+                      <span>Selecione uma data</span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={formValues.data}
+                    onSelect={(date) => setFormValues((prev) => ({ ...prev, data: date || new Date() }))}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
             </div>
           </div>
           <Button type="submit" className="w-full">
